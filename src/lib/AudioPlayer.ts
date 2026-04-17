@@ -11,6 +11,9 @@ export class AudioPlayer {
   }
 
   async playChunk(base64Data: string) {
+    if (this.audioContext.state === 'suspended') {
+      await this.audioContext.resume();
+    }
     const binary = window.atob(base64Data);
     const bytes = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i++) {

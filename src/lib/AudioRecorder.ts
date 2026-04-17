@@ -13,12 +13,23 @@ export class AudioRecorder {
 
   async start() {
     this.audioContext = new AudioContext({ sampleRate: 16000 });
-    this.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    
+    // Crucial for browser compatibility: resume context if it starts suspended
+    if (this.audioContext.state === 'suspended') {
+      await this.audioContext.resume();
+    }
+
+    this.stream = await navigator.mediaDevices.getUserMedia({ 
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true
+      } 
+    });
     const source = this.audioContext.createMediaStreamSource(this.stream);
 
-    // ScriptProcessor is deprecated but widely supported for simple PCM extraction in this context.
-    // In a production app, AudioWorklet would be better, but ScriptProcessor is more straightforward here.
-    this.processor = this.audioContext.createScriptProcessor(2048, 1, 1);
+    // Even lower buffer size for extreme snappiness (512 instead of 1024)
+    this.processor = this.audioContext.createScriptProcessor(512, 1, 1);
 
     source.connect(this.processor);
     this.processor.connect(this.audioContext.destination);
@@ -26,8 +37,14 @@ export class AudioRecorder {
     this.processor.onaudioprocess = (e) => {
       const inputData = e.inputBuffer.getChannelData(0);
       const pcmData = this.floatTo16BitPCM(inputData);
-      const base64Data = this.arrayBufferToBase64(pcmData.buffer);
-      this.onAudioChunk(base64Data);
+      
+      // Faster conversion to Base64
+      let binary = '';
+      const bytes = new Uint8Array(pcmData.buffer);
+      for (let i = 0; i < bytes.length; i += 8192) {
+        binary += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, i + 8192)));
+      }
+      this.onAudioChunk(window.btoa(binary));
     };
   }
 
@@ -47,15 +64,5 @@ export class AudioRecorder {
       output[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
     }
     return output;
-  }
-
-  private arrayBufferToBase64(buffer: ArrayBuffer): string {
-    let binary = '';
-    const bytes = new Uint8Array(buffer);
-    const len = bytes.byteLength;
-    for (let i = 0; i < len; i++) {
-      binary += String.fromCharCode(bytes[i]);
-    }
-    return window.btoa(binary);
   }
 }

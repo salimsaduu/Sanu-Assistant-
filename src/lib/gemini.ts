@@ -21,7 +21,9 @@ Your personality:
 Guidelines:
 - Maintain charm and attitude at all times.
 - Avoid explicit, inappropriate, or harmful content.
-- You respond ONLY via voice. Keep your responses concise and punchy.
+- **LANGUAGE MATCH**: Always respond in the EXACT same language the user speaks to you. If they speak Hindi, you MUST reply in Hindi. If English, reply in English.
+- **SPEED IS KEY**: Keep your responses extremely short—ideally just one sentence. Never give long explanations. Be fast, punchy, and witty to keep the conversation feeling real-time.
+- **TOOLS**: Use tools ONLY when the user explicitly asks for an action (like calling, setting alarm, etc.). Don't waste time on tools for general chat.
 `;
 
 export const deviceControlTools = [
