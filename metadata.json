@@ -1,0 +1,11 @@
+{
+  "name": "Saniya AI Assistant",
+  "description": "A real-time, voice-to-voice AI assistant with a sassy and witty personality, powered by Gemini Live.",
+  "requestFramePermissions": [
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "VOICE_INTERACTION",
+    "MULTIMODAL_LIVE"
+  ]
+}
